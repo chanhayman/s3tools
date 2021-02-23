@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='s3tools',
-    version='0.0.0',
+    version='0.0.1',
     description='A simple Python package to upload/download objects to AWS S3',
     long_description_content_type='text/markdown',
     author='Hayman',
@@ -18,5 +18,5 @@ setup(
     ],
     packages=find_packages(),
     python_requires='>=3.6, <4',
-    install_requires=['concurrent', 'boto3', 'glog']
+    install_requires=['boto3', 'glog']
 )

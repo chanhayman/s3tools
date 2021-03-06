@@ -54,12 +54,12 @@ class Bucket(Profile):
             log.error(f'-- Encountered error when locating objects in {self.bucket_name}/{filepath} -- {e}')
             return([])
 
-    def downloadObject(self, filepath, dst_dir):
+    def downloadObject(self, filepath, dst_dir='.'):
         """Download from s3 Bucket
 
         Args:
             filepath (str): Path to file in s3 Bucket
-            dst_dir (str): Path to local folder
+            dst_dir (str): Path to download destination. Default to current working directory.
         """
         filename = os.path.basename(filepath)
         new_path = os.path.join(dst_dir, filename)
@@ -86,12 +86,12 @@ class Bucket(Profile):
             log.error(f'-- ERROR: For {filename} -- {e}')
             return({'filename': filename, 'status': e})
 
-    def downloadObjectThread(self, list_items, dst_dir):
+    def downloadObjectThread(self, list_items, dst_dir='.'):
         """Download from s3 Bucket with ThreadPoolExecutor
 
         Args:
             list_items (list): List of object paths in s3 Bucket
-            dst_dir (str): Path to local folder
+            dst_dir (str): Path to download destination. Default to current working directory.
         """
         list_results = []
         with ThreadPoolExecutor(max_workers=None) as executor:
@@ -115,3 +115,24 @@ class Bucket(Profile):
                 results = future.result()
                 list_results.append(results)
         return(list_results)
+
+    def copyObject(self, filepath, dst_dir, anotherBucket=None):
+        """Copying objects between paths
+
+        Args:
+            filepath (str): Path to file in s3 Bucket
+            dst_dir (str): Path to where file should be copied in s3 Bucket
+            anotherBucket (str): Different bucket name. Default to None to move objects within same bucket.
+        """
+        filename = os.path.basename(filepath)
+        try:
+            if filename not in dst_dir:
+                dst_dir = os.path.join(dst_dir, filename)
+            copy_source = {'Bucket': self.bucket_name, 'Key': filepath}
+            if anotherBucket != None:
+                copy_source['Bucket'] = anotherBucket
+            self.s3session.Bucket(self.bucket_name).copy(copy_source, dst_dir)
+            return({'filename': filename, 'copied_to': dst_dir})
+        except Exception as e:
+            log.error(f'-- ERROR: For {filename} -- {e}')
+            return({'filename': filename, 'status': e})

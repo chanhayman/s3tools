@@ -130,8 +130,9 @@ class Bucket(Profile):
                 dst_dir = os.path.join(dst_dir, filename)
             copy_source = {'Bucket': self.bucket_name, 'Key': filepath}
             if anotherBucket != None:
-                copy_source['Bucket'] = anotherBucket
-            self.s3session.Bucket(self.bucket_name).copy(copy_source, dst_dir)
+                self.s3session.Bucket(anotherBucket).copy(copy_source, dst_dir)
+            else:
+                self.s3session.Bucket(self.bucket_name).copy(copy_source, dst_dir)
             return({'filename': filename, 'copied_to': dst_dir})
         except Exception as e:
             log.error(f'-- ERROR: For {filename} -- {e}')
